@@ -2,7 +2,7 @@ import random
 import numpy as np
 import tensorflow as tf
 
-class DQNAgent(object):
+class DuelingAgent(object):
     def __init__(self, session,
                        optimizer,
                        q_network,
@@ -72,11 +72,8 @@ class DQNAgent(object):
     def create_variables_for_optimization(self):
         with tf.name_scope("optimization"):
             self.loss = tf.reduce_mean(tf.square(self.action_scores - self.target_values))
-            self.loss = tf.cond(self.loss <= 0.5, lambda: 0.5 * tf.pow(self.loss, 2), lambda: 0.5 * self.loss - 0.125,
-                        name="huber_loss")
             self.trainable_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="q_network")
             self.gradients = self.optimizer.compute_gradients(self.loss, var_list=self.trainable_variables)
-            #self.gradients = [(tf.clip_by_norm(grad, 3.0), var) for grad, var in gradients]
             self.train_op = self.optimizer.apply_gradients(self.gradients)
 
     def create_variables_for_target_network_update(self):
